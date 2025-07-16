@@ -28,8 +28,6 @@ Do not include any checkout or SCM stage.
 Requirements:
 - Use Jenkins Declarative Pipeline Syntax
 - Use agent any
-- Include only the following stages: build, test
-- Use the build tool for installation or compilation
 - Use this test command in the test stage: ${testCommand}
 - Use 'bat' instead of 'sh' in all steps
 - No comments or explanations at all
