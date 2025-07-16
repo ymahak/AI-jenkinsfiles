@@ -21,6 +21,8 @@ async function generateJenkinsfile() {
 
   const prompt = `
 Generate a Jenkinsfile for a ${projectType} project using ${buildTool}.
+Only respond with the Jenkins Declarative Pipeline block, starting from "pipeline {".
+Do not include any comments or explanations before or after.
 Do not include any checkout or SCM stage.
 
 Requirements:
@@ -29,7 +31,8 @@ Requirements:
 - Include only the following stages: build, test
 - Use the build tool for installation or compilation
 - Use this test command in the test stage: ${testCommand}
-- Keep the pipeline simple and suitable for automation
+- Use 'bat' instead of 'sh' in all steps
+- No comments or explanations at all
 `;
 
   const url = "https://api.groq.com/openai/v1/chat/completions";
@@ -40,8 +43,8 @@ Requirements:
       {
         model: "llama3-70b-8192",
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 1000,
+        temperature: 0.3,
+        max_tokens: 800,
       },
       {
         headers: {
@@ -51,9 +54,15 @@ Requirements:
       }
     );
 
-    const generated = response.data.choices[0].message.content;
+    let content = response.data.choices[0].message.content.trim();
 
-    fs.writeFileSync("Jenkinsfile", generated);
+    // Remove any content before the first "pipeline {"
+    const index = content.indexOf("pipeline {");
+    if (index !== -1) {
+      content = content.slice(index);
+    }
+
+    fs.writeFileSync("Jenkinsfile", content);
     console.log("\n Jenkinsfile generated and saved as 'Jenkinsfile'.");
   } catch (error) {
     console.error("\n Error generating Jenkinsfile:", error.response?.data || error.message);
